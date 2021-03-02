@@ -1,0 +1,23 @@
+{
+  "name": "bitfinex-terminal-funding-book-encoding",
+  "version": "1.0.0",
+  "description": "Encoding for the Bitfinex Terminal Funding Book dataset",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bitfinexcom/bitfinex-terminal-funding-book-encoding.git"
+  },
+  "keywords": [
+    "bitfinex",
+    "terminal"
+  ],
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/bitfinexcom/bitfinex-terminal-funding-book-encoding/issues"
+  },
+  "homepage": "https://github.com/bitfinexcom/bitfinex-terminal-funding-book-encoding#readme",
+  "dependencies": {
+    "lexicographic-integer": "^1.1.0",
+    "varint": "^6.0.0"
+  }
+}
