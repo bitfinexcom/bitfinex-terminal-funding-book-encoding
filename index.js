@@ -1,4 +1,5 @@
 const varint = require('varint')
+const varintf = require('varint-fraction')
 const lexint = require('lexicographic-integer')
 
 const SLAB_SIZE = 512 * 1024
@@ -41,13 +42,8 @@ const valueEncoding = {
     ptr += varint.encode.bytes
 
     for (const b of entry.book) {
-      const rate = fractionEncode(b.rate)
-
-      varint.encode(rate[0], slab, ptr)
-      ptr += varint.encode.bytes
-
-      varint.encode(rate[1], slab, ptr)
-      ptr += varint.encode.bytes
+      varintf.encode(b.rate, slab, ptr)
+      ptr += varintf.encode.bytes
 
       varint.encode(b.period, slab, ptr)
       ptr += varint.encode.bytes
@@ -55,13 +51,8 @@ const valueEncoding = {
       varint.encode(b.count, slab, ptr)
       ptr += varint.encode.bytes
 
-      const amount = fractionEncode(b.amount)
-
-      varint.encode(amount[0], slab, ptr)
-      ptr += varint.encode.bytes
-
-      varint.encode(amount[1], slab, ptr)
-      ptr += varint.encode.bytes
+      varintf.encode(b.amount, slab, ptr)
+      ptr += varintf.encode.bytes
     }
 
     const buf = slab.subarray(0, ptr)
@@ -76,11 +67,8 @@ const valueEncoding = {
     ptr += varint.decode.bytes
 
     while (ptr < buf.length) {
-      const rate = varint.decode(buf, ptr)
-      ptr += varint.decode.bytes
-
-      const rateM = varint.decode(buf, ptr)
-      ptr += varint.decode.bytes
+      const rate = varintf.decode(buf, ptr)
+      ptr += varintf.decode.bytes
 
       const period = varint.decode(buf, ptr)
       ptr += varint.decode.bytes
@@ -88,17 +76,14 @@ const valueEncoding = {
       const count = varint.decode(buf, ptr)
       ptr += varint.decode.bytes
 
-      const amount = varint.decode(buf, ptr)
-      ptr += varint.decode.bytes
-
-      const amountM = varint.decode(buf, ptr)
-      ptr += varint.decode.bytes
+      const amount = varintf.decode(buf, ptr)
+      ptr += varintf.decode.bytes
 
       entry.book.push({
-        rate: fractionDecode(rate, rateM),
+        rate,
         period,
         count,
-        amount: fractionDecode(amount, amountM)
+        amount
       })
     }
 
@@ -107,57 +92,3 @@ const valueEncoding = {
 }
 
 module.exports = { valueEncoding, keyEncoding }
-
-function count10s (n) {
-  if (n === 0) return 0
-
-  let m = 0
-  while (Math.floor(n / 10) === n / 10) {
-    m++
-    n /= 10
-  }
-
-  return m
-}
-
-function fractionEncode (n) {
-  const sign = n < 0 ? -1 : 1
-
-  if (Math.floor(n) === n) {
-    return sign < 0 ? [-10 * n, 1] : [n, 0]
-  }
-
-  n *= sign
-
-  let m = 0
-
-  const top = Math.floor(n)
-
-  let digits = 0
-  let f = 1
-  while (10 * f * top < Number.MAX_SAFE_INTEGER && digits < 10) {
-    digits++
-    f *= 10
-  }
-
-  n -= top
-  m = digits - count10s(Math.round(n * f))
-
-  const pow = Math.pow(10, m)
-  return [Math.round(top * pow + n * pow), zigzagEncode(sign * m)]
-}
-
-function fractionDecode (n, m) {
-  m = zigzagDecode(m)
-  const pow = m < 0 ? -Math.pow(10, -m) : Math.pow(10, m)
-  return n / pow
-}
-
-function zigzagDecode (n) {
-  return n === 0 ? n : (n & 1) === 0 ? n / 2 : -(n + 1) / 2
-}
-
-function zigzagEncode (n) {
-  // 0, -1, 1, -2, 2, ...
-  return n < 0 ? (2 * -n) - 1 : n === 0 ? 0 : 2 * n
-}

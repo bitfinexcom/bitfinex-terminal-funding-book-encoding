@@ -21,7 +21,8 @@
   "homepage": "https://github.com/bitfinexcom/bitfinex-terminal-funding-book-encoding#readme",
   "dependencies": {
     "lexicographic-integer": "^1.1.0",
-    "varint": "^6.0.0"
+    "varint": "^6.0.0",
+    "varint-fraction": "^1.0.0"
   },
   "devDependencies": {
     "standard": "^16.0.3",
