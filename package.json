@@ -1,6 +1,6 @@
 {
   "name": "bitfinex-terminal-funding-book-encoding",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Encoding for the Bitfinex Terminal Funding Book dataset",
   "main": "index.js",
   "repository": {
